@@ -1,0 +1,20 @@
+# Core Django Framework
+Django
+
+# Django REST Framework for API endpoints
+djangorestframework
+
+# Environment variable management (for .env file)
+python-decouple
+
+# PostgreSQL database adapter
+psycopg2-binary
+
+# Database URL parsing for Railway/Render
+dj-database-url
+
+# Production WSGI server
+gunicorn
+
+# Static file serving for production
+whitenoise

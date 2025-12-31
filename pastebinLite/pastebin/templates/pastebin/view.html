@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Paste - Pastebin Lite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: white;
+            padding: 24px 32px;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .paste-id {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-copy {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-raw {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-raw:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-home {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-home:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .content-wrapper {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .toolbar {
+            background: #f8f9fa;
+            padding: 12px 32px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .line-numbers-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .line-numbers-toggle input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .content-container {
+            display: flex;
+            background: #282c34;
+            min-height: 400px;
+        }
+
+        .line-numbers {
+            background: #21252b;
+            color: #5c6370;
+            padding: 24px 16px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            user-select: none;
+            border-right: 1px solid #181a1f;
+        }
+
+        .line-numbers.hidden {
+            display: none;
+        }
+
+        .content {
+            flex: 1;
+            padding: 24px 32px;
+            overflow-x: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Courier New', Consolas, Monaco, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #abb2bf;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        .btn-create-new {
+            background: white;
+            color: #667eea;
+            padding: 14px 32px;
+            border-radius: 8px;
+            border: 2px solid white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-create-new:hover {
+            background: transparent;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .action-buttons {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .toolbar {
+                padding: 12px 20px;
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .line-numbers {
+                padding: 20px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                📄 Paste
+                <span class="paste-id">#{{ paste_id }}</span>
+            </h1>
+            <div class="action-buttons">
+                <button class="btn btn-copy" onclick="copyContent()">
+                    📋 Copy
+                </button>
+                <button class="btn btn-raw" onclick="viewRaw()">
+                    📝 Raw
+                </button>
+                <button class="btn btn-home" onclick="goHome()">
+                    🏠 Home
+                </button>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="toolbar">
+                <div class="line-numbers-toggle">
+                    <input type="checkbox" id="lineNumbersToggle" checked>
+                    <label for="lineNumbersToggle">Show line numbers</label>
+                </div>
+                <div class="char-count">
+                    <span id="charCount"></span> characters, <span id="lineCount"></span> lines
+                </div>
+            </div>
+
+            <div class="content-container">
+                <div class="line-numbers" id="lineNumbers"></div>
+                <div class="content">
+                    <pre id="pasteContent">{{ content }}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="btn-create-new" onclick="goHome()">
+                ➕ Create Your Own Paste
+            </button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        ✓ Copied to clipboard!
+    </div>
+
+    <script>
+        // Get the paste content
+        const content = document.getElementById('pasteContent').textContent;
+        
+        // Calculate and display statistics
+        const charCount = content.length;
+        const lineCount = content.split('\n').length;
+        
+        document.getElementById('charCount').textContent = charCount.toLocaleString();
+        document.getElementById('lineCount').textContent = lineCount.toLocaleString();
+
+        // Generate line numbers
+        function generateLineNumbers() {
+            const lineNumbersDiv = document.getElementById('lineNumbers');
+            const lines = content.split('\n');
+            lineNumbersDiv.innerHTML = lines.map((_, i) => i + 1).join('\n');
+        }
+
+        generateLineNumbers();
+
+        // Toggle line numbers
+        document.getElementById('lineNumbersToggle').addEventListener('change', (e) => {
+            const lineNumbersDiv = document.getElementById('lineNumbers');
+            if (e.target.checked) {
+                lineNumbersDiv.classList.remove('hidden');
+            } else {
+                lineNumbersDiv.classList.add('hidden');
+            }
+        });
+
+        // Copy content to clipboard
+        function copyContent() {
+            navigator.clipboard.writeText(content).then(() => {
+                showNotification('✓ Copied to clipboard!');
+            }).catch(err => {
+                showNotification('❌ Failed to copy');
+            });
+        }
+
+        // View raw content
+        function viewRaw() {
+            // Content from textContent is already safe (DOM decodes it for us)
+            const rawWindow = window.open('', '_blank');
+            rawWindow.document.write('<pre style="font-family: monospace; padding: 20px; white-space: pre-wrap; word-wrap: break-word;">' + 
+                content + 
+                '</pre>');
+            rawWindow.document.close();
+        }
+
+        // Go to home page
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
