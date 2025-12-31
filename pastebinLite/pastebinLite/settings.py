@@ -25,9 +25,18 @@ SECRET_KEY = 'django-insecure-6k_i!j+l=9#c$ycoqw=-&x%6^3qye@an8fvt*qyz0f(^mg4u#@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
+import os
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+    ALLOWED_HOSTS.append(".onrender.com")  # covers your Render domain
 
+# CSRF trusted origins (must include scheme: http/https)
+CSRF_TRUSTED_ORIGINS = [
+    "https://pastebinlite-7x18.onrender.com",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -106,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -117,3 +126,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
